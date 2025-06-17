@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Result</title>
+</head>
+<body>
+    {% if source == 'text' %}
+        <h2>Sentiment: {{ result }}</h2>
+        <p>Confidence: {{ confidence }}</p>
+    {% elif source == 'reddit' %}
+        <h2>Reddit Sentiment for '{{ keyword }}'</h2>
+        <ul>
+            {% for post, sentiment in reddit_results %}
+                <li><strong>{{ sentiment }}</strong>: {{ post[:100] }}...</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    <br>
+    <a href="/">Go Back</a>
+</body>
+</html>
