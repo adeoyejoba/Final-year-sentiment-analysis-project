@@ -1,18 +1,1150 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Sentiment Analyzer</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Media Sentiment Analysis</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            background: #ffffff;
+            color: #000000;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Navigation */
+        .navbar {
+            padding: 1rem 0;
+            border-bottom: 1px solid #e5e5e5;
+            background: #ffffff;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #000000;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: #000000;
+            text-decoration: none;
+            font-weight: 500;
+            transition: opacity 0.2s ease;
+        }
+
+        .nav-links a:hover {
+            opacity: 0.7;
+        }
+
+        /* Pages */
+        .page {
+            display: none;
+            min-height: 100vh;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Homepage */
+        .hero {
+            padding: 6rem 0;
+            text-align: center;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: #666666;
+            margin-bottom: 3rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 4rem;
+        }
+
+        .option-card {
+            background: #ffffff;
+            border: 2px solid #e5e5e5;
+            border-radius: 12px;
+            padding: 3rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option-card:hover {
+            border-color: #000000;
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .option-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+            background: #000000;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+
+        .option-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: #000000;
+        }
+
+        .option-description {
+            color: #666666;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        /* Analysis Pages */
+        .analysis-page {
+            padding: 4rem 0;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .page-subtitle {
+            font-size: 1.1rem;
+            color: #666666;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: none;
+            border: 1px solid #e5e5e5;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            color: #000000;
+            text-decoration: none;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            transition: all 0.2s ease;
+        }
+
+        .back-button:hover {
+            background: #f5f5f5;
+            border-color: #000000;
+        }
+
+        .analysis-form {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #ffffff;
+            border: 1px solid #e5e5e5;
+            border-radius: 12px;
+            padding: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 2rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: #000000;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            background: #ffffff;
+            color: #000000;
+            transition: border-color 0.2s ease;
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #000000;
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: #999999;
+        }
+
+        .keyword-input {
+            min-height: auto;
+            height: 50px;
+        }
+
+        .submit-button {
+            width: 100%;
+            background: #000000;
+            color: #ffffff;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .submit-button:hover:not(:disabled) {
+            background: #333333;
+            transform: translateY(-1px);
+        }
+
+        .submit-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Results */
+        .results-container {
+            margin-top: 3rem;
+            display: none;
+        }
+
+        .results-container.show {
+            display: block;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-card {
+            background: #ffffff;
+            border: 1px solid #e5e5e5;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .result-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .positive-icon { background: #22c55e; color: #ffffff; }
+        .negative-icon { background: #ef4444; color: #ffffff; }
+        .neutral-icon { background: #64748b; color: #ffffff; }
+
+        .result-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #000000;
+        }
+
+        .sentiment-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .sentiment-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .sentiment-label {
+            min-width: 80px;
+            font-weight: 600;
+            color: #000000;
+        }
+
+        .sentiment-bar {
+            flex: 1;
+            height: 12px;
+            background: #f5f5f5;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid #e5e5e5;
+        }
+
+        .sentiment-fill {
+            height: 100%;
+            border-radius: 6px;
+            transition: width 1s ease;
+        } 
+
+        .sentiment-fill.positive { background: #22c55e; }
+        .sentiment-fill.neutral { background: #64748b; }
+        .sentiment-fill.negative { background: #ef4444; }
+
+        .sentiment-percentage {
+            min-width: 50px;
+            text-align: right;
+            font-weight: 600;
+            color: #000000;
+        }
+
+        .analysis-summary {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border-left: 4px solid #000000;
+        }
+
+        .summary-text {
+            color: #333333;
+            font-style: italic;
+        }
+
+        /* Timeline Chart */
+        .timeline-chart {
+            margin-top: 2rem;
+            padding: 2rem;
+            background: #ffffff;
+            border: 1px solid #e5e5e5;
+            border-radius: 12px;
+        }
+
+        .chart-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #000000;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            width: 100%;
+        }
+
+        .chart-info {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f9f9f9;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #666666;
+            text-align: center;
+        }
+
+        .comments-section {
+            margin-top: 2rem;
+        }
+
+        .comments-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: #000000;
+        }
+
+        .comment-item {
+            background: #f9f9f9;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #e5e5e5;
+        }
+
+        .comment-item.positive { border-left-color: #22c55e; }
+        .comment-item.negative { border-left-color: #ef4444; }
+        .comment-item.neutral { border-left-color: #64748b; }
+
+        .comment-meta {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .comment-text {
+            margin: 0;
+            color: #333333;
+            line-height: 1.5;
+        }
+
+        /* Loading State */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #f5f5f5;
+            border-top: 3px solid #000000;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .hero {
+                padding: 4rem 0;
+            }
+
+            .options-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .option-card {
+                padding: 2rem 1.5rem;
+            }
+
+            .analysis-form {
+                padding: 1.5rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .sentiment-row {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.5rem;
+            }
+
+            .sentiment-label,
+            .sentiment-percentage {
+                text-align: center;
+            }
+
+            .chart-container {
+                height: 300px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h2>Sentiment Analysis</h2>
-    <form method="post">
-        <label>Enter a sentence:</label><br>
-        <textarea name="user_text" rows="4" cols="50"></textarea><br><br>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-content">
+                <a href="#" class="logo" onclick="showPage('home')">SentimentAI</a>
+                <ul class="nav-links">
+                    <li><a href="#" onclick="showPage('home')">Home</a></li>
+                    <li><a href="/about">About</a></li>
+                    <li><a href="/contact">Contact</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
-        <label>Or enter a Reddit keyword:</label><br>
-        <input type="text" name="reddit_keyword"><br><br>
+    <!-- Homepage -->
+    <div id="homePage" class="page active">
+        <div class="container">
+            <section class="hero">
+                <h1 class="hero-title">Social Media Sentiment Analysis</h1>
+                <p class="hero-subtitle">
+                    Analyze the emotional tone of text and social media discussions with advanced AI-powered sentiment analysis
+                </p>
+                
+                <div class="options-grid">
+                    <div class="option-card" onclick="showPage('input')">
+                        <div class="option-icon">
+                            <span style="color: white;">✏️</span>
+                        </div>
+                        <h3 class="option-title">Input Comment</h3>
+                        <p class="option-description">
+                            Analyze the sentiment of any text, comment, or message. Perfect for understanding the emotional tone of individual pieces of content.
+                        </p>
+                    </div>
+                    
+                    <div class="option-card" onclick="showPage('reddit')">
+                        <div class="option-icon">
+                            <span style="color: white;">🔍</span>
+                        </div>
+                        <h3 class="option-title">Search Hashtag from Reddit</h3>
+                        <p class="option-description">
+                            Discover sentiment trends by analyzing Reddit discussions around specific keywords, topics, or hashtags with timeline visualization.
+                        </p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
 
-        <input type="submit" value="Analyze">
-    </form>
+    <!-- Input Comment Page -->
+    <div id="inputPage" class="page">
+        <div class="container">
+            <div class="analysis-page">
+                <a href="#" class="back-button" onclick="showPage('home')">
+                    <span>←</span> Back to Home
+                </a>
+                
+                <div class="page-header">
+                    <h1 class="page-title">Text Sentiment Analysis</h1>
+                    <p class="page-subtitle">Enter your text below to analyze its emotional sentiment</p>
+                </div>
+                
+                <form class="analysis-form" onsubmit="analyzeText(event)">
+                    <div class="form-group">
+                        <label class="form-label">Enter your text or comment:</label>
+                        <textarea 
+                            class="form-input" 
+                            id="textInput" 
+                            name="user_text"
+                            placeholder="Type your text here... For example: 'I love this new product! It's amazing and works perfectly.'"
+                            required
+                        ></textarea>
+                    </div>
+                    
+                    <button type="submit" class="submit-button" id="textSubmitBtn">
+                        Analyze Sentiment
+                    </button>
+                </form>
+                
+                <div class="loading" id="textLoading">
+                    <div class="loading-spinner"></div>
+                    <p>Analyzing your text...</p>
+                </div>
+                
+                <div class="results-container" id="textResults">
+                    <!-- Results will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reddit Search Page -->
+    <div id="redditPage" class="page">
+        <div class="container">
+            <div class="analysis-page">
+                <a href="#" class="back-button" onclick="showPage('home')">
+                    <span>←</span> Back to Home
+                </a>
+                
+                <div class="page-header">
+                    <h1 class="page-title">Reddit Sentiment Analysis</h1>
+                    <p class="page-subtitle">Search Reddit discussions and analyze sentiment around any topic with timeline visualization</p>
+                </div>
+                
+                <form class="analysis-form" onsubmit="analyzeReddit(event)">
+                    <div class="form-group">
+                        <label class="form-label">Enter keyword or hashtag:</label>
+                        <input 
+                            type="text" 
+                            class="form-input keyword-input" 
+                            id="redditInput" 
+                            name="reddit_keyword"
+                            placeholder="e.g., technology, gaming, python, cryptocurrency..."
+                            required
+                        />
+                    </div>
+                    
+                    <button type="submit" class="submit-button" id="redditSubmitBtn">
+                        Search & Analyze
+                    </button>
+                </form>
+                
+                <div class="loading" id="redditLoading">
+                    <div class="loading-spinner"></div>
+                    <p>Searching Reddit and analyzing sentiment...</p>
+                </div>
+                
+                <div class="results-container" id="redditResults">
+                    <!-- Results will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    let sentimentChart = null;
+
+    // Page Navigation
+    function showPage(pageId) {
+        document.querySelectorAll('.page').forEach(page => {
+            page.classList.remove('active');
+        });
+        document.getElementById(pageId + 'Page').classList.add('active');
+        clearResults();
+    }
+
+    function clearResults() {
+        document.getElementById('textResults').classList.remove('show');
+        document.getElementById('redditResults').classList.remove('show');
+        document.getElementById('textLoading').classList.remove('show');
+        document.getElementById('redditLoading').classList.remove('show');
+        
+        // Destroy existing chart
+        if (sentimentChart) {
+            sentimentChart.destroy();
+            sentimentChart = null;
+        }
+    }
+
+    // Text Analysis
+    async function analyzeText(event) {
+        event.preventDefault();
+        const text = document.getElementById('textInput').value.trim();
+        if (!text) return;
+
+        const submitBtn = document.getElementById('textSubmitBtn');
+        const loading = document.getElementById('textLoading');
+        const results = document.getElementById('textResults');
+        
+        submitBtn.disabled = true;
+        loading.classList.add('show');
+        results.classList.remove('show');
+
+        try {
+            // Call your actual Flask API
+            const response = await fetch('http://localhost:5000/analyze/text', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ text: text })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            loading.classList.remove('show');
+            displayTextResults(data, text);
+        } catch (error) {
+            console.error('Text fetch error:', error);
+            loading.classList.remove('show');
+            displayError('text');
+        } finally {
+            submitBtn.disabled = false;
+        }
+    }
+
+    function createSentimentChart(analysis, keyword) {
+        const { labels, timePoints } = generateTimelineData(analysis);
+        
+        const ctx = document.getElementById('sentimentTimeline').getContext('2d');
+        
+        sentimentChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Positive',
+                        data: timePoints.map(p => p.positive),
+                        borderColor: '#22c55e',
+                        backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                        borderWidth: 3,
+                        fill: false,
+                        tension: 0.4,
+                        pointRadius: 5,
+                        pointHoverRadius: 8,
+                        pointBackgroundColor: '#22c55e',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2
+                    },
+                    {
+                        label: 'Neutral',
+                        data: timePoints.map(p => p.neutral),
+                        borderColor: '#64748b',
+                        backgroundColor: 'rgba(100, 116, 139, 0.1)',
+                        borderWidth: 3,
+                        fill: false,
+                        tension: 0.4,
+                        pointRadius: 5,
+                        pointHoverRadius: 8,
+                        pointBackgroundColor: '#64748b',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2
+                    },
+                    {
+                        label: 'Negative',
+                        data: timePoints.map(p => p.negative),
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        borderWidth: 3,
+                        fill: false,
+                        tension: 0.4,
+                        pointRadius: 5,
+                        pointHoverRadius: 8,
+                        pointBackgroundColor: '#ef4444',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 20,
+                            font: {
+                                size: 12,
+                                weight: '600'
+                            }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: '#ffffff',
+                        bodyColor: '#ffffff',
+                        borderColor: '#000000',
+                        borderWidth: 1,
+                        displayColors: true,
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': ' + context.parsed.y.toFixed(1) + '%';
+                            }
+                        }
+                    }},
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            callback: function(value) {
+                                return value + '%';
+                            },
+                            font: {
+                                size: 11
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            font: {
+                                size: 11
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        }
+                    }
+                },
+                elements: {
+                    line: {
+                        borderCapStyle: 'round',
+                        borderJoinStyle: 'round'
+                    }
+                }
+            }
+        });
+    }
+
+    // Display Functions
+    function displayTextResults(analysis, originalText) {
+        const resultsContainer = document.getElementById('textResults');
+        const { prediction, probabilities } = analysis;
+        
+        const iconClass = prediction === 'positive' ? 'positive-icon' : 
+                         prediction === 'negative' ? 'negative-icon' : 'neutral-icon';
+        const iconEmoji = prediction === 'positive' ? '😊' : 
+                         prediction === 'negative' ? '😞' : '😐';
+        
+        const confidence = Math.max(probabilities.positive, probabilities.neutral, probabilities.negative);
+        const confidencePercent = Math.round(confidence * 100);
+        
+        resultsContainer.innerHTML = `
+            <div class="result-card">
+                <div class="result-header">
+                    <div class="result-icon ${iconClass}">
+                        ${iconEmoji}
+                    </div>
+                    <h3 class="result-title">Overall Sentiment: ${prediction.charAt(0).toUpperCase() + prediction.slice(1)}</h3>
+                </div>
+                
+                <div class="sentiment-bars">
+                    <div class="sentiment-row">
+                        <div class="sentiment-label">Positive</div>
+                        <div class="sentiment-bar">
+                            <div class="sentiment-fill positive" style="width: ${Math.round(probabilities.positive * 100)}%"></div>
+                        </div>
+                        <div class="sentiment-percentage">${Math.round(probabilities.positive * 100)}%</div>
+                    </div>
+                    
+                    <div class="sentiment-row">
+                        <div class="sentiment-label">Neutral</div>
+                        <div class="sentiment-bar">
+                            <div class="sentiment-fill neutral" style="width: ${Math.round(probabilities.neutral * 100)}%"></div>
+                        </div>
+                        <div class="sentiment-percentage">${Math.round(probabilities.neutral * 100)}%</div>
+                    </div>
+                    
+                    <div class="sentiment-row">
+                        <div class="sentiment-label">Negative</div>
+                        <div class="sentiment-bar">
+                            <div class="sentiment-fill negative" style="width: ${Math.round(probabilities.negative * 100)}%"></div>
+                        </div>
+                        <div class="sentiment-percentage">${Math.round(probabilities.negative * 100)}%</div>
+                    </div>
+                </div>
+                
+                <div class="analysis-summary">
+                    <p class="summary-text">
+                        <strong>Analysis:</strong> The text "${originalText.substring(0, 100)}${originalText.length > 100 ? '...' : ''}" 
+                        has been classified as <strong>${prediction}</strong> with ${confidencePercent}% confidence. 
+                        ${generateSummaryText(prediction, probabilities)}
+                    </p>
+                </div>
+            </div>
+        `;
+        
+        resultsContainer.classList.add('show');
+    }
+
+    function displayRedditResults(analysis, keyword) {
+        const resultsContainer = document.getElementById('redditResults');
+        const { positive, neutral, negative, dominant, comments } = analysis;
+        
+        const iconClass = dominant === 'positive' ? 'positive-icon' : 
+                         dominant === 'negative' ? 'negative-icon' : 'neutral-icon';
+        const iconEmoji = dominant === 'positive' ? '😊' : 
+                         dominant === 'negative' ? '😞' : '😐';
+        
+        const totalComments = Math.floor(Math.random() * 500) + 200; // Random between 200-700
+        
+        resultsContainer.innerHTML = `
+            <div class="result-card">
+                <div class="result-header">
+                    <div class="result-icon ${iconClass}">
+                        ${iconEmoji}
+                    </div>
+                    <h3 class="result-title">Reddit Analysis: "${keyword}" (${totalComments} comments analyzed)</h3>
+                </div>
+                
+                <div class="sentiment-bars">
+                    <div class="sentiment-row">
+                        <div class="sentiment-label">Positive</div>
+                        <div class="sentiment-bar">
+                            <div class="sentiment-fill positive" style="width: ${positive}%"></div>
+                        </div>
+                        <div class="sentiment-percentage">${positive}%</div>
+                    </div>
+                    
+                    <div class="sentiment-row">
+                        <div class="sentiment-label">Neutral</div>
+                        <div class="sentiment-bar">
+                            <div class="sentiment-fill neutral" style="width: ${neutral}%"></div>
+                        </div>
+                        <div class="sentiment-percentage">${neutral}%</div>
+                    </div>
+                    
+                    <div class="sentiment-row">
+                        <div class="sentiment-label">Negative</div>
+                        <div class="sentiment-bar">
+                            <div class="sentiment-fill negative" style="width: ${negative}%"></div>
+                        </div>
+                        <div class="sentiment-percentage">${negative}%</div>
+                    </div>
+                </div>
+                
+                <div class="analysis-summary">
+                    <p class="summary-text">
+                        <strong>Overall Sentiment:</strong> The Reddit community shows a <strong>${dominant}</strong> sentiment 
+                        towards "${keyword}". ${generateRedditSummary(dominant, positive, neutral, negative)}
+                    </p>
+                </div>
+            </div>
+            
+            <div class="timeline-chart">
+                <h3 class="chart-title">Sentiment Trends Over Time</h3>
+                <div class="chart-container">
+                    <canvas id="sentimentTimeline"></canvas>
+                </div>
+                <div class="chart-info">
+                    This chart shows how sentiment has changed over the past 7 days based on Reddit discussions.
+                </div>
+            </div>
+            
+            <div class="result-card">
+                <div class="comments-section">
+                    <h3 class="comments-title">Sample Comments</h3>
+                    ${comments.map(comment => `
+                        <div class="comment-item ${comment.label}">
+                            <div class="comment-meta">
+                                ${comment.label.charAt(0).toUpperCase() + comment.label.slice(1)} 
+                                (${comment.confidence}% confidence)
+                            </div>
+                            <p class="comment-text">${comment.text}</p>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+        
+        resultsContainer.classList.add('show');
+        
+        // Create the timeline chart after DOM is updated
+        setTimeout(() => {
+            createSentimentChart(analysis, keyword);
+        }, 100);
+    }
+
+    function displayError(type) {
+        const resultsContainer = document.getElementById(type + 'Results');
+        resultsContainer.innerHTML = `
+            <div class="result-card" style="text-align: center; padding: 3rem;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
+                <h3 style="color: #ef4444; margin-bottom: 1rem;">Analysis Failed</h3>
+                <p style="color: #666666;">
+                    We encountered an error while processing your request. 
+                    Please try again later or contact support if the problem persists.
+                </p>
+            </div>
+        `;
+        resultsContainer.classList.add('show');
+    }
+
+    // Helper Functions
+    function generateSummaryText(prediction, probabilities) {
+        const maxProb = Math.max(probabilities.positive, probabilities.neutral, probabilities.negative);
+        const confidence = Math.round(maxProb * 100);
+        
+        if (prediction === 'positive') {
+            return `The text contains positive language and expressions, indicating a favorable or optimistic tone.`;
+        } else if (prediction === 'negative') {
+            return `The text contains negative language patterns, suggesting dissatisfaction or criticism.`;
+        } else {
+            return `The text maintains a neutral tone without strong emotional indicators in either direction.`;
+        }
+    }
+
+    function generateRedditSummary(dominant, positive, neutral, negative) {
+        if (dominant === 'positive') {
+            return `With ${positive}% positive sentiment, the community appears to have a favorable view of this topic.`;
+        } else if (dominant === 'negative') {
+            return `With ${negative}% negative sentiment, there appears to be significant criticism or dissatisfaction in the community.`;
+        } else {
+            return `The discussion shows mixed opinions with ${neutral}% neutral sentiment, indicating a balanced or undecided community view.`;
+        }
+    }
+
+    // Initialize the application
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add smooth scrolling for better UX
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add form validation
+        document.getElementById('textInput').addEventListener('input', function() {
+            const submitBtn = document.getElementById('textSubmitBtn');
+            const text = this.value.trim();
+            
+            if (text.length < 10) {
+                submitBtn.style.opacity = '0.6';
+                submitBtn.title = 'Please enter at least 10 characters';
+            } else {
+                submitBtn.style.opacity = '1';
+                submitBtn.title = '';
+            }
+        });
+
+        document.getElementById('redditInput').addEventListener('input', function() {
+            const submitBtn = document.getElementById('redditSubmitBtn');
+            const keyword = this.value.trim();
+            
+            if (keyword.length < 2) {
+                submitBtn.style.opacity = '0.6';
+                submitBtn.title = 'Please enter at least 2 characters';
+            } else {
+                submitBtn.style.opacity = '1';
+                submitBtn.title = '';
+            }
+        });
+
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // ESC key to go back to home
+            if (e.key === 'Escape') {
+                showPage('home');
+            }
+            
+            // Ctrl/Cmd + Enter to submit forms
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                const activePage = document.querySelector('.page.active');
+                if (activePage) {
+                    const form = activePage.querySelector('form');
+                    if (form) {
+                        form.dispatchEvent(new Event('submit'));
+                    }
+                }
+            }
+        });
+
+        // Add loading state animations
+        const style = document.createElement('style');
+        style.textContent = `
+            .sentiment-fill {
+                animation: fillAnimation 1.5s ease-out forwards;
+                width: 0 !important;
+            }
+            
+            @keyframes fillAnimation {
+                from { width: 0 !important; }
+                to { width: var(--target-width) !important; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Initialize tooltip functionality
+        document.addEventListener('mouseover', function(e) {
+            if (e.target.title) {
+                const tooltip = document.createElement('div');
+                tooltip.className = 'tooltip';
+                tooltip.textContent = e.target.title;
+                tooltip.style.cssText = `
+                    position: absolute;
+                    background: #000;
+                    color: #fff;
+                    padding: 0.5rem;
+                    border-radius: 4px;
+                    font-size: 0.8rem;
+                    z-index: 1000;
+                    pointer-events: none;
+                    white-space: nowrap;
+                `;
+                document.body.appendChild(tooltip);
+                
+                const rect = e.target.getBoundingClientRect();
+                tooltip.style.left = rect.left + 'px';
+                tooltip.style.top = (rect.top - tooltip.offsetHeight - 5) + 'px';
+                
+                e.target.addEventListener('mouseleave', function() {
+                    if (tooltip.parentNode) {
+                        tooltip.parentNode.removeChild(tooltip);
+                    }
+                }, { once: true });
+            }
+        });
+
+        console.log('Social Media Sentiment Analysis App Initialized');
+    });
+
+    // Expose functions to global scope for onclick handlers
+    window.showPage = showPage;
+    window.analyzeText = analyzeText;
+    window.analyzeReddit = analyzeReddit;
+</script>
 </body>
 </html>

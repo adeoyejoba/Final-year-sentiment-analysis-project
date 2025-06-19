@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>About - Sentiment Analysis Project</title>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            max-width: 800px; 
+            margin: 40px auto; 
+            line-height: 1.6; 
+            padding: 0 20px;
+            background-color: white;
+            color: black;
+        }
+        
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            color: black;
+            text-decoration: none;
+            margin-bottom: 20px;
+            font-size: 16px;
+            background-color: transparent;
+            padding: 10px 16px;
+            border: 2px solid black;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .back-button:hover {
+            background-color: black;
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .back-button span {
+            margin-right: 8px;
+            font-size: 18px;
+        }
+        
+        h1 { 
+            color: black; 
+            margin-bottom: 20px;
+        }
+        
+        h3 {
+            color: black;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+        
+        p {
+            color: black;
+            margin-bottom: 16px;
+        }
+        
+        ul {
+            color: black;
+            margin-left: 20px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+            color: black;
+        }
+        
+        strong {
+            color: black;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <a href="#" class="back-button" onclick="showPage('home')">
+        <span>←</span> Back to Home
+    </a>
+    
+    <h1>About This Project</h1>
+    <p>
+        This Sentiment Analysis system was developed as a final year project to analyze the emotional tone behind written text. 
+        It uses a deep learning model powered by a Bidirectional LSTM (Long Short-Term Memory) network, enhanced with 
+        <strong>pre-trained GloVe word embeddings</strong> for improved language understanding.
+    </p>
+    <p>
+        The model was trained on the IMDB movie review dataset, along with additional manually labeled samples to recognize 
+        both subtle and strong emotional cues. Users can test the sentiment of custom text or even analyze real-time content 
+        from Reddit using integrated APIs.
+    </p>
+    <h3>Features:</h3>
+    <ul>
+        <li>Accurate sentiment prediction (Positive, Negative, Neutral)</li>
+        <li>Preprocessing and text cleaning pipeline</li>
+        <li>Integration with Reddit for real-world sentiment tracking</li>
+        <li>Responsive Flask-powered web interface</li>
+        <li>Built using TensorFlow, Keras, Pandas, and Matplotlib</li>
+    </ul>
+    <h3>Purpose:</h3>
+    <p>
+        The aim of this project is to demonstrate how machine learning can be applied to understand and interpret natural 
+        language — offering insights into public opinion, feedback, and trends.
+    </p>
+
+    <script>
+        // Function to handle page navigation
+        function showPage(page) {
+            if (page === 'home') {
+                // Replace with your actual home page URL or navigation logic
+                window.location.href = '/';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,33 +1,53 @@
-# pyright: reportMissingImports=false
 import tensorflow as tf
 import pickle
 import re
-from tensorflow.keras.preprocessing.sequence import pad_sequences
-from .text_cleaner import clean_text
+from tensorflow.keras.preprocessing.sequence import pad_sequences  # type: ignore[import]
+from .text_cleaner import clean_text  # ✅ Make sure this exists
 
-
-# Clean text function directly included
-def clean_text(text):
-    text = text.lower()
-    text = re.sub(r"http\S+|www\S+|https\S+", '', text, flags=re.MULTILINE)  # remove URLs
-    text = re.sub(r'\@w+|\#','', text)  # remove mentions and hashtags
-    text = re.sub(r"[^a-zA-Z0-9\s]", "", text)  # remove punctuation
-    text = re.sub(r'\s+', ' ', text).strip()  # remove extra spaces
-    return text
-
-# Load the model and tokenizer
 def load_model_tokenizer():
     model = tf.keras.models.load_model("models/model.keras")
     with open("models/tokenizer.pkl", "rb") as f:
         tokenizer = pickle.load(f)
     return model, tokenizer
 
-# Predict sentiment of input text
 def predict_text_sentiment(model, tokenizer, text):
-    cleaned = clean_text(text)
-    seq = tokenizer.texts_to_sequences([cleaned])
-    padded = pad_sequences(seq, maxlen=200)
-    pred = model.predict(padded)[0][0]
-    label = "Positive" if pred >= 0.5 else "Negative"
-    confidence = float(pred if pred >= 0.5 else 1 - pred)
-    return label, confidence
+    try:
+        print("Raw input:", text)
+
+        # Optional: Override for clearly negative expressions
+        if "hate" in text.lower() and "love" not in text.lower():
+            print("⚠️ Strong negative phrase detected, overriding model prediction.")
+            return "Negative", 0.95
+
+        # Clean and tokenize input
+        cleaned = clean_text(text)
+        print("Cleaned text:", cleaned)
+
+        seq = tokenizer.texts_to_sequences([cleaned])
+        print("Tokenized sequence:", seq)
+
+        if not seq or not seq[0]:
+            raise ValueError("Input text could not be tokenized.")
+
+        padded = pad_sequences(seq, maxlen=200)
+        print("Padded sequence shape:", padded.shape)
+
+        pred = model.predict(padded)[0][0]
+        print("Raw model prediction score:", pred)
+
+        # Adjusted threshold logic
+        if pred >= 0.6:
+            label = "Positive"
+        elif pred <= 0.4:
+            label = "Negative"
+        else:
+            label = "Neutral"
+
+        confidence = float(max(pred, 1 - pred))
+        print("Label:", label, "| Confidence:", confidence)
+
+        return label, confidence
+
+    except Exception as e:
+        print("🔥 predict_text_sentiment() failed:", e)
+        raise

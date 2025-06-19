@@ -1,21 +1,73 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Result</title>
+    <meta charset="UTF-8">
+    <title>Analysis Result</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h2 {
+            color: #333;
+        }
+        ul {
+            padding: 0;
+            list-style: none;
+        }
+        li {
+            margin-bottom: 10px;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+        .positive { background-color: #e6ffed; }
+        .negative { background-color: #ffe6e6; }
+        .neutral  { background-color: #f0f0f0; }
+        .back-link {
+            margin-top: 20px;
+            display: inline-block;
+        }
+    </style>
 </head>
 <body>
+
     {% if source == 'text' %}
-        <h2>Sentiment: {{ result }}</h2>
-        <p>Confidence: {{ confidence }}</p>
+        <h2>Sentiment Analysis Result</h2>
+        <p><strong>Text:</strong> {{ input_text }}</p>
+        <p><strong>Sentiment:</strong> {{ result }}</p>
+        <p><strong>Confidence:</strong> {{ confidence }}%</p>
+
     {% elif source == 'reddit' %}
-        <h2>Reddit Sentiment for '{{ keyword }}'</h2>
-        <ul>
-            {% for post, sentiment in reddit_results %}
-                <li><strong>{{ sentiment }}</strong>: {{ post[:100] }}...</li>
-            {% endfor %}
-        </ul>
+        <h2>Reddit Sentiment for "{{ keyword }}"</h2>
+
+        {% if sentiment_summary %}
+            <ul>
+                <li><strong>Positive:</strong> {{ sentiment_summary.Positive }}</li>
+                <li><strong>Neutral:</strong> {{ sentiment_summary.Neutral }}</li>
+                <li><strong>Negative:</strong> {{ sentiment_summary.Negative }}</li>
+            </ul>
+        {% endif %}
+
+        {% if reddit_comments %}
+            <ul>
+                {% for comment in reddit_comments %}
+                    <li class="{{ comment.label | lower }}">
+                        <strong>{{ comment.label }} ({{ comment.confidence }}%)</strong><br>
+                        {{ comment.text[:200] }}{% if comment.text|length > 200 %}...{% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No Reddit comments found for this keyword.</p>
+        {% endif %}
     {% endif %}
-    <br>
-    <a href="/">Go Back</a>
+
+    {% if error %}
+        <p style="color: red;"><strong>Error:</strong> {{ error }}</p>
+    {% endif %}
+
+    <a class="back-link" href="/">← Go Back</a>
+
 </body>
 </html>
